@@ -1,6 +1,5 @@
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.action === 'startDownload') {
-        const path = message.path;
         const downloadOptions = message.downloadOptions;
 
         // Implement your extraction logic based on downloadOptions
