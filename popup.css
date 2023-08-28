@@ -1,0 +1,40 @@
+.container {
+    width: 180px;
+    padding: 10px; /* Equal padding for all sides */
+    font-family: Arial, sans-serif;
+}
+
+h2 {
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.options .option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.options input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+.download-btn-container {
+    margin-top: 15px;
+}
+
+.download-btn {
+    width: 100%;
+    padding: 8px;
+    background-color: #9b59b6;  /* Pretty purple */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.download-btn:hover {
+    background-color: #8e44ad;  /* Slightly darker purple */
+}

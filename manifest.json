@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "Ali Downloads",
+    "version": "1.0",
+    "description": "Extension to facilitate dropshippers in downloading product data from selected sites.",
+    "permissions": [
+      "activeTab",
+      "storage",
+      "downloads"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup.html"
+    },
+    "content_scripts": [{
+      "matches": ["*://alibaba.com/*", "*://aliexpress.com/*"],
+      "js": ["content.js"]
+    }]
+  }
+  
