@@ -14,10 +14,6 @@
     },
     "action": {
       "default_popup": "popup.html"
-    },
-    "content_scripts": [{
-      "matches": ["*://alibaba.com/*", "*://aliexpress.com/*"],
-      "js": ["content.js"]
-    }]
+    }
   }
   

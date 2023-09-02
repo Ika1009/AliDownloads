@@ -3,15 +3,37 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             const currentTab = tabs[0];
             if (currentTab.url.includes("aliexpress.com") || currentTab.url.includes("alibaba.com")) {
-                chrome.tabs.executeScript(currentTab.id, {file: "content.js"}, function() {
-                    chrome.tabs.sendMessage(currentTab.id, message);
+                // Send a probing message
+                chrome.tabs.sendMessage(currentTab.id, {action: "probe"}, function(response) {
+                    // If error, it likely means the content script isn't injected yet
+                    if (chrome.runtime.lastError) {
+                        chrome.scripting.executeScript({
+                            target: {tabId: currentTab.id},
+                            files: ["content.js"]
+                        }, function() {
+                            if(chrome.runtime.lastError) {
+                                console.error(chrome.runtime.lastError);
+                                sendResponse({status: 'error'});
+                                return;
+                            }
+                            // Send the main message after injection
+                            chrome.tabs.sendMessage(currentTab.id, message);
+                        });
+                    } else {
+                        // If no error, content script is active, just send the main message
+                        chrome.tabs.sendMessage(currentTab.id, message);
+                    }
                 });
+
             } else {
-                showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.")
+                showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.");
             }
         });
     }
+    return true; // to allow async `sendResponse`
 });
+
+
 
 function showNotification(tab, textMessage) {
     chrome.scripting.executeScript({

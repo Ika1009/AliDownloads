@@ -1,7 +1,12 @@
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    if (message.action === 'probe') {
+        sendResponse({status: "active"});
+        return;
+    }
+
     if (message.action === 'startDownload') {
         const downloadOptions = message.downloadOptions;
-
+        
         if (window.location.href.includes("aliexpress.com")) {
             extractFromAliExpress(downloadOptions);
         } else if (window.location.href.includes("alibaba.com")) {
@@ -13,7 +18,12 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     }
 });
 
+// ... rest of your content.js code ...
+
+
 function extractFromAliExpress(options) {
+    console.log("ALIEKSPRES");
+    console.log(options);
     if (options.images) {
         // AliExpress specific logic to extract images
     }
@@ -26,6 +36,8 @@ function extractFromAliExpress(options) {
 }
 
 function extractFromAlibaba(options) {
+    console.log("ALIBABA");
+    console.log(options);
     if (options.images) {
         // Alibaba specific logic to extract images
     }
