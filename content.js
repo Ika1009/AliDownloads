@@ -134,7 +134,7 @@ async function extractFromAliExpress(options) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     const arrayBuffer = bytes.buffer;
-                    zip.file(`videos/${url.split('/').pop().split('?')[0]}`, arrayBuffer);
+                    zip.file(`videos/${"video"}`, arrayBuffer);
                     console.log("Video added to zip:", url);
                     resolve();
                 } else {
@@ -255,7 +255,7 @@ async function extractFromAlibaba(options) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     const arrayBuffer = bytes.buffer;
-                    zip.file(`videos/${url.split('/').pop().split('?')[0]}`, arrayBuffer);
+                    zip.file(`videos/${"video"}`, arrayBuffer);
                     console.log("Video added to zip:", url);
                     resolve();
                 } else {
