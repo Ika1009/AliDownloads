@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                     if (chrome.runtime.lastError) {
                         chrome.scripting.executeScript({
                             target: {tabId: currentTab.id},
-                            files: ["content.js"]
+                            files: ["vendor/jszip.min.js", "content.js"]
                         }, function() {
                             if(chrome.runtime.lastError) {
                                 console.error(chrome.runtime.lastError);
@@ -29,6 +29,35 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                 showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.");
             }
         });
+    }
+    else if (message.action === 'fetchVideo') {
+        fetch(message.url)
+            .then(response => response.blob())
+            .then(blob => {
+                const reader = new FileReader();
+                function arrayBufferToBase64(buffer) {
+                    let binary = '';
+                    const bytes = new Uint8Array(buffer);
+                    const len = bytes.byteLength;
+                    for (let i = 0; i < len; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    return btoa(binary);
+                }           
+                reader.onloadend = function() {
+                    if (reader.readyState == FileReader.DONE) {
+                        const base64String = arrayBufferToBase64(reader.result);
+                        sendResponse({data: base64String});
+                    }
+                };
+                               
+                reader.readAsArrayBuffer(blob);
+            })
+            .catch(error => {
+                console.error("Error fetching video:", error);
+                sendResponse(null);
+            });
+        return true;  // to allow async `sendResponse`
     }
     return true; // to allow async `sendResponse`
 });

@@ -35,83 +35,116 @@ function extractFromAliExpress(options) {
         // AliExpress specific logic to extract product description
     }
 }
+
+
 async function extractFromAlibaba(options) {
+    const zip = new JSZip();
 
-    // Click on the "View larger image" button to open the image/video modal
+    // For description
+    if (options.description) {
+        const headerElement = document.querySelector("h1");
+        if (headerElement) {
+            const extractedText = Array.from(headerElement.childNodes)
+                .filter(child => child.nodeType === 3)
+                .map(child => child.textContent)
+                .join('');
+            zip.file('description.txt', extractedText);
+        }
+    }
+
+    const imgURLs = [];
+
+    // For images and videos
     if (options.images || options.videos) {
-        const potentialButtons = Array.from(document.querySelectorAll('span[data-spm-anchor-id^="a2700.details"]'));        
-        const viewLargerImageBtn = potentialButtons.find(btn => btn.innerText.trim() === "View larger image");
-        console.log("View larger image button:", viewLargerImageBtn);
-
+        const spans = Array.from(document.querySelectorAll('span'));
+        const viewLargerImageBtn = spans.find(span => span.textContent.trim() === "View larger image");
+        
         if (viewLargerImageBtn) {
             viewLargerImageBtn.click();
-            console.log("Clicked on 'View larger image' button.");
-            await delay(5000); // Wait for 5 seconds for modal to load fully
+            await delay(5000);
 
-            // After the modal loads, extract the image and video URLs
-            const sliderDiv = document.querySelector('div.slider-list[data-spm-anchor-id^="a2700.details.0."]');
-            console.log("Slider Div element:", sliderDiv);
+            const sliderDiv = document.querySelector('div.slider-list');
             
             if (sliderDiv && options.images) {
-                const sliderItems = sliderDiv.children;
-                const imgURLs = [];
-            
-                for (let item of sliderItems) {
+                for (let item of sliderDiv.children) {
                     const imgElement = item.querySelector('img');
                     if (imgElement) {
                         let highResURL = imgElement.src.replace('250x250', '960x960');
                         imgURLs.push(highResURL);
+                        console.log("Image URL captured:", highResURL);
                     }
                 }
-            
-                console.log("Extracted high-res image URLs:", imgURLs);
             }
         }
     }
 
-    // If the options.videos is true, fetch the video URLs
+    const videoURLs = [];
+
+    // For videos
     if (options.videos) {
         const videoElement = document.querySelector('video');
-        console.log("Video Element:", videoElement);
         
         if (videoElement) {
-            let videoSrc = videoElement.src;
-            console.log("Video Source:", videoSrc);
-            videoURLs.push(videoSrc);
-        }
-
-        //close modal popup
-        const selector = 'i.detail-next-icon.detail-next-icon-close.detail-next-medium.detail-next-dialog-close-icon[data-spm-anchor-id^="a2700.details.0."]';
-        const closeIcon = document.querySelector(selector);
-        console.log("Close icon:", closeIcon);
-        
-        if (closeIcon) {
-            closeIcon.click();
-            console.log("Clicked on Close icon.");
+            videoURLs.push(videoElement.src);
+            console.log("Video URL captured:", videoElement.src);
         } else {
-            console.warn("Close icon not found on the page.");
+            console.log("Video element not found.");
         }
     }
 
-    if (options.description) {
-        const selector = 'h1[data-spm-anchor-id^="a2700.details.0."]';
-        const headerElement = document.querySelector(selector);
-        console.log("Header element:", headerElement);
-        
-        if (!headerElement) {
-            console.warn("Header element not found on the page.");
-            return null;
-        }
-    
-        // Extracting text while ignoring child elements
-        const childElements = Array.from(headerElement.childNodes);
-        let extractedText = '';
-        for (let child of childElements) {
-            if (child.nodeType === 3) { // 3 means Text node
-                extractedText += child.textContent;
-            }
-        }
-        console.log("Extracted text from header:", extractedText);
-    }    
-}
+    // Add URLs to zip for images. This part assumes you can fetch and convert blobs to arrayBuffer.
+    for (let url of imgURLs) {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        zip.file(`images/${url.split('/').pop()}`, arrayBuffer);
+    }
 
+    // Request background to fetch videos due to potential CORS issues
+    for (let url of videoURLs) {
+        chrome.runtime.sendMessage({
+            action: 'fetchVideo',
+            url: url
+        }, function(response) {
+            if (response && response.data) {
+                const base64String = response.data;
+                const binaryString = atob(base64String);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const arrayBuffer = bytes.buffer;
+                zip.file(`videos/${url.split('/').pop().split('?')[0]}`, arrayBuffer);
+                console.log("Video added to zip:", url);
+            } else {
+                console.error("Error fetching video from background:", url);
+            }
+            resolve();
+        });
+        
+    }
+
+    // Since adding video is an asynchronous operation, let's add a delay here to ensure the video is added before we generate the zip
+    await delay(5000);
+
+    // Finally, generate zip and trigger download
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+        const tempURL = URL.createObjectURL(content);
+        const tempLink = document.createElement('a');
+        tempLink.href = tempURL;
+        tempLink.setAttribute('download', 'ali-downloads.zip');
+        
+        // Append to document for Firefox compatibility
+        document.body.appendChild(tempLink);
+        
+        tempLink.click();
+        
+        // Remove the link and revoke the URL
+        document.body.removeChild(tempLink);
+        URL.revokeObjectURL(tempURL);
+
+        console.log("ZIP file download triggered.");
+    });
+    
+}
