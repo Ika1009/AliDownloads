@@ -22,18 +22,153 @@ function delay(ms) {
     return new Promise(res => setTimeout(res, ms));
 }
 
-function extractFromAliExpress(options) {
-    console.log("ALIEKSPRES");
-    console.log(options);
-    if (options.images) {
-        // AliExpress specific logic to extract images
-    }
-    if (options.videos) {
-        // AliExpress specific logic to extract videos
-    }
+async function extractFromAliExpress(options) {
+    const zip = new JSZip();
+
+    // For description
     if (options.description) {
-        // AliExpress specific logic to extract product description
+        const headerElement = document.querySelectorAll("h1")[1];
+        if (headerElement) {
+            const extractedText = Array.from(headerElement.childNodes)
+                .filter(child => child.nodeType === 3)
+                .map(child => child.textContent)
+                .join('');
+                console.log(extractedText);
+            zip.file('description.txt', extractedText);
+        }
     }
+
+    const imgURLs = [];
+
+    // For images and videos
+    if (options.images || options.videos) {
+
+        const sliderDiv = document.querySelector('ul.images-view-list');
+        
+        if (sliderDiv && options.images) {
+            for (let item of sliderDiv.children) {
+                const imgElement = item.querySelector('img');
+                if (imgElement) {
+                    let highResURL = imgElement.src.replace('220x220', '960x960');
+                    imgURLs.push(highResURL);
+                    console.log("Image URL captured:", highResURL);
+                }
+            }
+        }
+    }
+
+    async function convertWebpToPng(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = url;
+            img.crossOrigin = 'anonymous';  // This ensures that CORS headers are respected
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = this.naturalWidth;
+                canvas.height = this.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(this, 0, 0);
+                canvas.toBlob(blob => resolve(blob), 'image/png');
+            };
+            img.onerror = reject;
+        });
+    }
+    let counter=1;
+    async function addImageToZip(url) {
+
+        let blob;
+        if (url.endsWith('.webp')) {
+            blob = await convertWebpToPng(url);
+        } else {
+            const response = await fetch(url);
+            blob = await response.blob();
+        }
+        const arrayBuffer = await blob.arrayBuffer();
+        let filename = `images/${url.split('/').pop()}`;
+        filename = `images/image${counter}.png`;
+        zip.file(filename, arrayBuffer);
+        counter++;
+    }
+    
+    // Convert the for-loop into an array of promises
+    const imagePromises = imgURLs.map(addImageToZip);
+    
+    // Wait for all images to be processed and added to the zip
+    await Promise.all(imagePromises);
+
+
+
+
+    const videoURLs = [];
+
+    if (options.videos) {
+        const videoElement = document.querySelector('video');
+        if (videoElement) {
+            let videoSrc = videoElement.src;
+            // Change the video codec to h264
+            if (videoSrc.includes("definition=h265")) {
+                videoSrc = videoSrc.replace("definition=h265", "definition=h264");
+            }
+            videoURLs.push(videoSrc);
+            console.log("Video URL captured:", videoSrc);
+        } else {
+            console.log("Video element not found.");
+        }
+    }
+    
+    const videoPromises = [];
+
+    // Request background to fetch videos due to potential CORS issues
+    for (let url of videoURLs) {
+        const videoPromise = new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({
+                action: 'fetchVideo',
+                url: url
+            }, function(response) {
+                if (response && response.data) {
+                    const base64String = response.data;
+                    const binaryString = atob(base64String);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const arrayBuffer = bytes.buffer;
+                    zip.file(`videos/${url.split('/').pop().split('?')[0]}`, arrayBuffer);
+                    console.log("Video added to zip:", url);
+                    resolve();
+                } else {
+                    console.error("Error fetching video from background:", url);
+                    reject(new Error("Error fetching video from background"));
+                }
+            });
+        });
+        
+        videoPromises.push(videoPromise);
+    }
+    
+    // Wait for all video downloads to complete
+    await Promise.all(videoPromises);
+
+    // Finally, generate zip and trigger download
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
+        const tempURL = URL.createObjectURL(content);
+        const tempLink = document.createElement('a');
+        tempLink.href = tempURL;
+        tempLink.setAttribute('download', 'Ali-Express-downloads.zip');
+        
+        // Append to document for Firefox compatibility
+        document.body.appendChild(tempLink);
+        
+        tempLink.click();
+        
+        // Remove the link and revoke the URL
+        document.body.removeChild(tempLink);
+        URL.revokeObjectURL(tempURL);
+
+        console.log("ZIP file download triggered.");
+    });
+
 }
 
 
@@ -77,6 +212,15 @@ async function extractFromAlibaba(options) {
             }
         }
     }
+    let counter = 1;
+    // Add URLs to zip for images. This part assumes you can fetch and convert blobs to arrayBuffer.
+    for (let url of imgURLs) {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        zip.file(`images${counter}`, arrayBuffer);
+        counter++;
+    }
 
     const videoURLs = [];
 
@@ -92,13 +236,6 @@ async function extractFromAlibaba(options) {
         }
     }
 
-    // Add URLs to zip for images. This part assumes you can fetch and convert blobs to arrayBuffer.
-    for (let url of imgURLs) {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        zip.file(`images/${url.split('/').pop()}`, arrayBuffer);
-    }
 
     const videoPromises = [];
 
@@ -139,7 +276,7 @@ async function extractFromAlibaba(options) {
         const tempURL = URL.createObjectURL(content);
         const tempLink = document.createElement('a');
         tempLink.href = tempURL;
-        tempLink.setAttribute('download', 'ali-downloads.zip');
+        tempLink.setAttribute('download', 'Ali-Baba-downloads.zip');
         
         // Append to document for Firefox compatibility
         document.body.appendChild(tempLink);
