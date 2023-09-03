@@ -61,7 +61,7 @@ async function extractFromAlibaba(options) {
         
         if (viewLargerImageBtn) {
             viewLargerImageBtn.click();
-            await delay(5000);
+            await delay(3000);
 
             const sliderDiv = document.querySelector('div.slider-list');
             
@@ -100,33 +100,39 @@ async function extractFromAlibaba(options) {
         zip.file(`images/${url.split('/').pop()}`, arrayBuffer);
     }
 
+    const videoPromises = [];
+
     // Request background to fetch videos due to potential CORS issues
     for (let url of videoURLs) {
-        chrome.runtime.sendMessage({
-            action: 'fetchVideo',
-            url: url
-        }, function(response) {
-            if (response && response.data) {
-                const base64String = response.data;
-                const binaryString = atob(base64String);
-                const len = binaryString.length;
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
+        const videoPromise = new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage({
+                action: 'fetchVideo',
+                url: url
+            }, function(response) {
+                if (response && response.data) {
+                    const base64String = response.data;
+                    const binaryString = atob(base64String);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const arrayBuffer = bytes.buffer;
+                    zip.file(`videos/${url.split('/').pop().split('?')[0]}`, arrayBuffer);
+                    console.log("Video added to zip:", url);
+                    resolve();
+                } else {
+                    console.error("Error fetching video from background:", url);
+                    reject(new Error("Error fetching video from background"));
                 }
-                const arrayBuffer = bytes.buffer;
-                zip.file(`videos/${url.split('/').pop().split('?')[0]}`, arrayBuffer);
-                console.log("Video added to zip:", url);
-            } else {
-                console.error("Error fetching video from background:", url);
-            }
-            resolve();
+            });
         });
         
+        videoPromises.push(videoPromise);
     }
-
-    // Since adding video is an asynchronous operation, let's add a delay here to ensure the video is added before we generate the zip
-    await delay(5000);
+    
+    // Wait for all video downloads to complete
+    await Promise.all(videoPromises);
 
     // Finally, generate zip and trigger download
     zip.generateAsync({ type: 'blob' }).then(function(content) {
