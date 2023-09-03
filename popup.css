@@ -38,3 +38,14 @@ h2 {
 .download-btn:hover {
     background-color: #8e44ad;  /* Slightly darker purple */
 }
+.download-btn[disabled] {
+    background-color: #ccc;  /* Gray background */
+    cursor: not-allowed;     /* Indicate that the button is not clickable */
+}
+.download-progress {
+    width: 100%;          /* Full width of its container */
+    height: 10px;         /* Or adjust to your desired thickness */
+    display: none;        /* Initially hidden */
+    margin-top: 10px;     /* Some spacing between button and progress bar */
+}
+
