@@ -134,7 +134,7 @@ async function extractFromAliExpress(options) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     const arrayBuffer = bytes.buffer;
-                    zip.file(`videos/${"video"}`, arrayBuffer);
+                    zip.file(`videos/${"video_" + url.split('/').pop().split('?')[0]}`, arrayBuffer);
                     console.log("Video added to zip:", url);
                     resolve();
                 } else {
@@ -212,15 +212,22 @@ async function extractFromAlibaba(options) {
             }
         }
     }
-    let counter = 1;
     // Add URLs to zip for images. This part assumes you can fetch and convert blobs to arrayBuffer.
+    let counter = 1;
     for (let url of imgURLs) {
         const response = await fetch(url);
         const blob = await response.blob();
         const arrayBuffer = await blob.arrayBuffer();
-        zip.file(`images${counter}`, arrayBuffer);
+        
+        // Extract the file extension from the URL
+        const fileExtension = url.split('/').pop().split('.').pop();
+    
+        // Rename the image using the counter and preserve its extension
+        const filename = `images/image_${counter}.${fileExtension}`;
+        zip.file(filename, arrayBuffer);
+    
         counter++;
-    }
+    }    
 
     const videoURLs = [];
 
@@ -255,7 +262,9 @@ async function extractFromAlibaba(options) {
                         bytes[i] = binaryString.charCodeAt(i);
                     }
                     const arrayBuffer = bytes.buffer;
-                    zip.file(`videos/${"video"}`, arrayBuffer);
+                    const fileExtension = url.split('/').pop().split('?')[0].split('.').pop();
+                    const filename = `videos/video.${fileExtension}`;
+                    zip.file(filename, arrayBuffer);
                     console.log("Video added to zip:", url);
                     resolve();
                 } else {
