@@ -1,14 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Ali Downloads",
+  "name": "AliDownload",
   "version": "1.0",
-  "description": "Extension to facilitate dropshippers in downloading product data from selected sites.",
+  "description": "Extension to facilitate dropshippers in downloading product data from Alibaba and Aliexpress.",
   "permissions": [
     "activeTab",
-    "storage",
     "downloads",
-    "scripting",
-    "webRequest"
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"
