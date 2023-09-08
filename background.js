@@ -85,7 +85,7 @@ function showNotification(tab, textMessage) {
             // Create the title
             var notificationTitle = document.createElement('h2');
             notificationTitle.style.color = '#333333';  // Dark gray color
-            notificationTitle.textContent = 'Erorr!';
+            notificationTitle.textContent = 'Error!';
             notificationContainer.appendChild(notificationTitle);
 
             // Create the message
