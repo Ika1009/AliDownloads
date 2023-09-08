@@ -17,14 +17,24 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                                 return;
                             }
                             // Send the main message after injection
-                            chrome.tabs.sendMessage(currentTab.id, message);
+                            chrome.tabs.sendMessage(currentTab.id, message, function(response) {
+                                // Check if the response status is "noData"
+                                if (response && response.status === "noData") {
+                                    showNotification(currentTab, "No relevant data found on the current page.");
+                                }
+                            });
                         });
                     } else {
                         // If no error, content script is active, just send the main message
-                        chrome.tabs.sendMessage(currentTab.id, message);
+                        chrome.tabs.sendMessage(currentTab.id, message, function(response) {
+                            // Check if the response status is "noData"
+                            if (response && response.status === "noData") {
+                                showNotification(currentTab, "No relevant data found on the current page.");
+                            }
+                        });
                     }
                 });
-
+    
             } else {
                 showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.");
             }

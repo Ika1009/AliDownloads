@@ -8,10 +8,19 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
         const downloadOptions = message.downloadOptions;
         
         if (window.location.href.includes("aliexpress.com")) {
-            extractFromAliExpress(downloadOptions);
+            const success = await extractFromAliExpress(downloadOptions);
+            if (!success) {
+                sendResponse({status: "noData"});
+                return;
+            }
         } else if (window.location.href.includes("alibaba.com")) {
-            await extractFromAlibaba(downloadOptions);
+            const success = await extractFromAlibaba(downloadOptions);
+            if (!success) {
+                sendResponse({status: "noData"});
+                return;
+            }
         }
+        
 
         // Send back a message if needed
         sendResponse({status: "downloaded"});
@@ -150,6 +159,9 @@ async function extractFromAliExpress(options) {
     // Wait for all video downloads to complete
     await Promise.all(videoPromises);
 
+    // Check to not download if empty
+    if (zip.files || zip.files.length == undefined || zip.files.length === 0) return false;
+
     // Finally, generate zip and trigger download
     zip.generateAsync({ type: 'blob' }).then(function(content) {
         const tempURL = URL.createObjectURL(content);
@@ -168,7 +180,7 @@ async function extractFromAliExpress(options) {
 
         console.log("ZIP file download triggered.");
     });
-
+    return true;
 }
 
 
@@ -280,6 +292,9 @@ async function extractFromAlibaba(options) {
     // Wait for all video downloads to complete
     await Promise.all(videoPromises);
 
+    // Check to not download if empty
+    if (zip.files || zip.files.length == undefined || zip.files.length === 0) return false;
+
     // Finally, generate zip and trigger download
     zip.generateAsync({ type: 'blob' }).then(function(content) {
         const tempURL = URL.createObjectURL(content);
@@ -298,5 +313,5 @@ async function extractFromAlibaba(options) {
 
         console.log("ZIP file download triggered.");
     });
-    
+    return true;
 }
