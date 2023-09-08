@@ -3,27 +3,24 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
         sendResponse({status: "active"});
         return;
     }
-
     if (message.action === 'startDownload') {
         const downloadOptions = message.downloadOptions;
         
-        if (window.location.href.includes("aliexpress.com")) {
+        if (window.location.href.includes("aliexpress.com/item/")) {
             const success = await extractFromAliExpress(downloadOptions);
             if (!success) {
                 sendResponse({status: "noData"});
                 return;
             }
-        } else if (window.location.href.includes("alibaba.com")) {
+        } else if (window.location.href.includes("alibaba.com/product-detail/")) {
             const success = await extractFromAlibaba(downloadOptions);
             if (!success) {
                 sendResponse({status: "noData"});
                 return;
             }
         }
-        
-
-        // Send back a message if needed
-        sendResponse({status: "downloaded"});
+        else
+            sendResponse({status: "noData"});
     }
 });
 
@@ -36,15 +33,51 @@ async function extractFromAliExpress(options) {
 
     // For description
     if (options.description) {
+        let descriptionContent = '';
+    
+        // Extracting the title
         const headerElement = document.querySelectorAll("h1")[1];
         if (headerElement) {
             const extractedText = Array.from(headerElement.childNodes)
                 .filter(child => child.nodeType === 3)
                 .map(child => child.textContent)
                 .join('');
-                console.log(extractedText);
-            zip.file('description.txt', extractedText);
+            descriptionContent += extractedText + '\n';
         }
+
+        const parent = document.getElementById("nav-specification")
+        let buttonElement;
+        if(parent) buttonElement = parent.querySelector("button.specification--btn--CXRSSZD");
+        // Click the button if it's found
+        if (buttonElement) {
+            buttonElement.click();
+            // Extracting the table specifications
+            const specificationLines = document.querySelectorAll(".specification--line--iUJOqof");
+            if (specificationLines.length > 0) {
+            specificationLines.forEach(line => {
+                const titles = Array.from(line.querySelectorAll(".specification--title--UbVeyic span"));
+                const descriptions = Array.from(line.querySelectorAll(".specification--desc--Mz148Bl span"));
+    
+                for (let i = 0; i < titles.length; i++) {
+                    descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
+                }
+            });
+            }
+        } else {
+            const specificationLines = document.querySelectorAll(".specification--line--iUJOqof");
+            if (specificationLines.length > 0) {
+            specificationLines.forEach(line => {
+                const titles = Array.from(line.querySelectorAll(".specification--title--UbVeyic span"));
+                const descriptions = Array.from(line.querySelectorAll(".specification--desc--Mz148Bl span"));
+    
+                for (let i = 0; i < titles.length; i++) {
+                    descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
+                }
+            });
+            }
+        }
+
+        zip.file('description.txt', descriptionContent);
     }
 
     const imgURLs = [];
@@ -106,8 +139,6 @@ async function extractFromAliExpress(options) {
     await Promise.all(imagePromises);
 
 
-
-
     const videoURLs = [];
 
     if (options.videos) {
@@ -126,7 +157,6 @@ async function extractFromAliExpress(options) {
     }
     
     const videoPromises = [];
-
     // Request background to fetch videos due to potential CORS issues
     for (let url of videoURLs) {
         const videoPromise = new Promise((resolve, reject) => {
@@ -159,9 +189,6 @@ async function extractFromAliExpress(options) {
     // Wait for all video downloads to complete
     await Promise.all(videoPromises);
 
-    // Check to not download if empty
-    if (zip.files || zip.files.length == undefined || zip.files.length === 0) return false;
-
     // Finally, generate zip and trigger download
     zip.generateAsync({ type: 'blob' }).then(function(content) {
         const tempURL = URL.createObjectURL(content);
@@ -189,14 +216,37 @@ async function extractFromAlibaba(options) {
 
     // For description
     if (options.description) {
+        let descriptionContent = '';
+    
+        // Extracting the title
         const headerElement = document.querySelector("h1");
         if (headerElement) {
             const extractedText = Array.from(headerElement.childNodes)
                 .filter(child => child.nodeType === 3)
                 .map(child => child.textContent)
                 .join('');
-            zip.file('description.txt', extractedText);
+            descriptionContent += extractedText + '\n';
         }
+
+        for(let i=0; i<2;i++)
+        {
+            // Extracting the first two rows from the structure-table
+            const tableElement = document.getElementsByClassName("structure-table")[i];
+            if (tableElement) {
+                const rows = tableElement.getElementsByClassName("structure-row");
+                for (let i = 0; i < rows.length; i++) { // Only first two rows or less
+                    const colLeft = rows[i].getElementsByClassName("col-left")[0];
+                    const colRight = rows[i].getElementsByClassName("col-right")[0];
+                    
+                    if (colLeft && colRight) {
+                        const rowContent = `${colLeft.textContent.trim()}: ${colRight.textContent.trim()}`;
+                        descriptionContent += rowContent + '\n';
+                    }
+                }
+            }
+        }
+    
+        zip.file('description.txt', descriptionContent);
     }
 
     const imgURLs = [];
@@ -288,12 +338,8 @@ async function extractFromAlibaba(options) {
         
         videoPromises.push(videoPromise);
     }
-    
     // Wait for all video downloads to complete
     await Promise.all(videoPromises);
-
-    // Check to not download if empty
-    if (zip.files || zip.files.length == undefined || zip.files.length === 0) return false;
 
     // Finally, generate zip and trigger download
     zip.generateAsync({ type: 'blob' }).then(function(content) {
