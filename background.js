@@ -2,6 +2,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.action === 'startDownload') {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             const currentTab = tabs[0];
+            showNotification(currentTab, "Please ensure you have authors permission before you press download. Alidownload will not be held responsible for any downloads done so without the authors permission.", "Warning");
             if (currentTab.url.includes("aliexpress.com") || currentTab.url.includes("alibaba.com")) {
                 // Send a probing message
                 chrome.tabs.sendMessage(currentTab.id, {action: "probe"}, function(response) {
@@ -20,7 +21,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                             chrome.tabs.sendMessage(currentTab.id, message, function(response) {
                                 // Check if the response status is "noData"
                                 if (response && response.status === "noData") {
-                                    showNotification(currentTab, "No relevant data found on the current page.");
+                                    showNotification(currentTab, "No relevant data found on the current page.", "Error!");
                                 }
                             });
                         });
@@ -29,14 +30,14 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                         chrome.tabs.sendMessage(currentTab.id, message, function(response) {
                             // Check if the response status is "noData"
                             if (response && response.status === "noData") {
-                                showNotification(currentTab, "No relevant data found on the current page.");
+                                showNotification(currentTab, "No relevant data found on the current page.", "Error!");
                             }
                         });
                     }
                 });
     
             } else {
-                showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.");
+                showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.", "Error!");
             }
         });
     }
@@ -74,10 +75,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
 
 
-function showNotification(tab, textMessage) {
+function showNotification(tab, textMessage, titleMessage) {
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        function: function(message) {
+        function: function(message, title) {
             // Create a notification container
             var notificationContainer = document.createElement('div');
             notificationContainer.style.position = 'fixed';
@@ -95,7 +96,7 @@ function showNotification(tab, textMessage) {
             // Create the title
             var notificationTitle = document.createElement('h2');
             notificationTitle.style.color = '#333333';  // Dark gray color
-            notificationTitle.textContent = 'Error!';
+            notificationTitle.textContent = title;
             notificationContainer.appendChild(notificationTitle);
 
             // Create the message
@@ -127,9 +128,9 @@ function showNotification(tab, textMessage) {
                 if (document.body.contains(notificationContainer)) {
                     document.body.removeChild(notificationContainer);
                 }
-            }, 4000);
+            }, 5000);
         },
-        args: [textMessage]  // Passed into the function
+        args: [textMessage, titleMessage]  // Passed into the function
     });
 }
 
