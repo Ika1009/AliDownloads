@@ -79,8 +79,16 @@ function showNotification(tab, textMessage, titleMessage) {
     chrome.scripting.executeScript({
         target: { tabId: tab.id },
         function: function(message, title) {
+
+            // Check if a notification is already displayed
+            var existingNotification = document.querySelector('.chrome-ext-notification');
+            if (existingNotification) {
+                document.body.removeChild(existingNotification);
+            }
+
             // Create a notification container
             var notificationContainer = document.createElement('div');
+            notificationContainer.className = 'chrome-ext-notification';  // Add a class name to remove it
             notificationContainer.style.position = 'fixed';
             notificationContainer.style.bottom = '20px';
             notificationContainer.style.right = '20px';
