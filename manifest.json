@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AliDownload",
+  "name": "Ali-Downloads",
   "version": "1.0",
   "description": "Extension to facilitate dropshippers in downloading product data from Alibaba and Aliexpress.",
   "permissions": [

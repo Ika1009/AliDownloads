@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.action === 'startDownload') {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             const currentTab = tabs[0];
-            showNotification(currentTab, "Please ensure you have authors permission before you press download. Alidownload will not be held responsible for any downloads done so without the authors permission.", "Warning");
+            showNotification(currentTab, "Please ensure you have authors permission before you press download. Ali-Downloads will not be held responsible for any downloads done so without the authors permission.", "Warning");
             if (currentTab.url.includes("aliexpress.com") || currentTab.url.includes("alibaba.com")) {
                 // Send a probing message
                 chrome.tabs.sendMessage(currentTab.id, {action: "probe"}, function(response) {
