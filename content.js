@@ -91,7 +91,7 @@ async function extractFromAliExpress(options) {
             for (let item of sliderDiv.children) {
                 const imgElement = item.querySelector('img');
                 if (imgElement) {
-                    let highResURL = imgElement.src.replace('220x220', '960x960');
+                    let highResURL = imgElement.src.replace('220x220', '9600x9600');
                     imgURLs.push(highResURL);
                     console.log("Image URL captured:", highResURL);
                 }
@@ -228,7 +228,7 @@ async function extractFromAlibaba(options) {
             descriptionContent += extractedText + '\n';
         }
 
-        for(let i=0; i<2;i++)
+        for(let i=0; i<2;i++) 
         {
             // Extracting the first two rows from the structure-table
             const tableElement = document.getElementsByClassName("structure-table")[i];
@@ -266,7 +266,7 @@ async function extractFromAlibaba(options) {
                 for (let item of sliderDiv.children) {
                     const imgElement = item.querySelector('img');
                     if (imgElement) {
-                        let highResURL = imgElement.src.replace('250x250', '960x960');
+                        let highResURL = imgElement.src.replace('250x250', '9600x9600');
                         imgURLs.push(highResURL);
                         console.log("Image URL captured:", highResURL);
                     }
