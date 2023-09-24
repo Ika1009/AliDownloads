@@ -1,3 +1,16 @@
+importScripts('ExtPay.js')
+
+const extpay = ExtPay('ali-downloads');
+extpay.startBackground();
+
+extpay.getUser().then(user => {
+    // Save the user's payment status to use later
+    chrome.storage.local.set({'userPaidStatus': user.paid});
+}).catch(error => {
+    console.error("Error fetching user data from ExtPay:", error);
+});
+
+
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.action === 'startDownload') {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {

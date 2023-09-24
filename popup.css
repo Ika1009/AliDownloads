@@ -49,3 +49,13 @@ h2 {
     margin-top: 10px;     /* Some spacing between button and progress bar */
 }
 
+.container {
+    width: 180px;;
+    padding: 20px; 
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0; /* light grey background */
+    border-radius: 10px; /* rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* subtle shadow for 3D effect */
+    text-align: center;
+    margin: 0 auto;
+}
