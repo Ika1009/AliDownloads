@@ -31,6 +31,8 @@ chrome.storage.local.get('userPaidStatus', function(data) {
             <div class="download-btn-container">
                 <button class="download-btn">Download</button>
                 <progress class="download-progress" max="100" value="0"></progress>
+                <!-- Add the small text here -->
+                <span class="corner-text">© Ali-Downloads</span>
             </div>
         </div>
         `;

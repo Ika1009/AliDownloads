@@ -59,3 +59,11 @@ h2 {
     text-align: center;
     margin: 0 auto;
 }
+.corner-text {
+    display: block;
+    font-size: 12px; /* Adjust as needed */
+    position: absolute;
+    bottom: 5px; /* Adjust the spacing from the bottom as needed */
+    right: 5px; /* Adjust the spacing from the right as needed */
+    color: #666; /* Adjust the color as needed */
+}
