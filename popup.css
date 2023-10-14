@@ -27,7 +27,7 @@ h2 {
 .download-btn {
     width: 100%;
     padding: 8px;
-    background-color: #9b59b6;  /* Pretty purple */
+    background-color: #0185fb;  /* Pretty blue */
     color: #ffffff;
     border: none;
     border-radius: 4px;
@@ -36,7 +36,7 @@ h2 {
 }
 
 .download-btn:hover {
-    background-color: #8e44ad;  /* Slightly darker purple */
+    background-color: #036ac4;  /* Slightly darker blue */
 }
 .download-btn[disabled] {
     background-color: #ccc;  /* Gray background */

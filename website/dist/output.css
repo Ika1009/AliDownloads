@@ -459,7 +459,7 @@ video {
   --tw-ring-inset:  ;
   --tw-ring-offset-width: 0px;
   --tw-ring-offset-color: #fff;
-  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-color: #0185fb;
   --tw-ring-offset-shadow: 0 0 #0000;
   --tw-ring-shadow: 0 0 #0000;
   --tw-shadow: 0 0 #0000;
@@ -509,7 +509,7 @@ video {
   --tw-ring-inset:  ;
   --tw-ring-offset-width: 0px;
   --tw-ring-offset-color: #fff;
-  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-color: #0185fb
   --tw-ring-offset-shadow: 0 0 #0000;
   --tw-ring-shadow: 0 0 #0000;
   --tw-shadow: 0 0 #0000;
@@ -906,7 +906,7 @@ video {
 
 .bg-custom-purple {
   --tw-bg-opacity: 1;
-  background-color: rgb(80 101 168 / var(--tw-bg-opacity));
+  background-color: #0185fb;
 }
 
 .bg-gray-50 {
@@ -1158,7 +1158,7 @@ video {
 
   .dark\:bg-custom-purple {
     --tw-bg-opacity: 1;
-    background-color: rgb(80 101 168 / var(--tw-bg-opacity));
+    background-color: #0185fb;
   }
 
   .dark\:bg-gray-700 {
@@ -1434,7 +1434,7 @@ video {
 
   .md\:text-custom-purple {
     --tw-text-opacity: 1;
-    color: rgb(80 101 168 / var(--tw-text-opacity));
+    color: #0185fb;
   }
 
   .md\:hover\:bg-transparent:hover {
@@ -1443,7 +1443,7 @@ video {
 
   .md\:hover\:text-custom-purple:hover {
     --tw-text-opacity: 1;
-    color: rgb(80 101 168 / var(--tw-text-opacity));
+    color: #0185fb;
   }
 
   @media (prefers-color-scheme: dark) {
@@ -1454,7 +1454,7 @@ video {
 
     .md\:dark\:text-custom-purple {
       --tw-text-opacity: 1;
-      color: rgb(80 101 168 / var(--tw-text-opacity));
+      color: #0185fb;
     }
 
     .md\:dark\:hover\:bg-transparent:hover {
@@ -1463,7 +1463,7 @@ video {
 
     .md\:dark\:hover\:text-custom-purple:hover {
       --tw-text-opacity: 1;
-      color: rgb(80 101 168 / var(--tw-text-opacity));
+      color: #0185fb;
     }
   }
 }

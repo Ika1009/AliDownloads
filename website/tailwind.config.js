@@ -5,7 +5,7 @@ module.exports = {
     extend: {
       colors: {
         'custom-black': '#242121',
-        'custom-purple': '#5065A8',
+        'custom-purple': '#0185fb',
       },
     },
   },
