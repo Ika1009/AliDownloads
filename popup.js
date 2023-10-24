@@ -9,7 +9,7 @@ extpay.getUser().then(user => {
 });
 
 chrome.storage.local.get('userPaidStatus', function(data) {
-    if (data.userPaidStatus) {
+   if (data.userPaidStatus) {
         // Set the new content for paid users
         document.body.innerHTML = `
         <div class="container">
@@ -78,7 +78,16 @@ chrome.storage.local.get('userPaidStatus', function(data) {
             };
 
             // Send message to background.js
-            chrome.runtime.sendMessage(message);
+            chrome.runtime.sendMessage(message, function(response) {
+                if (response && response.status === "noData") {
+                    clearInterval(progressInterval);  // Stop the progress bar
+                    progressBar.value = 0;  // Reset progress bar to 0
+                    downloadBtn.disabled = false;  // Re-enable the button
+                    progressBar.style.display = 'none';  // Hide the progress bar again
+                    showNotification("No relevant data found on the current page.", "Error!");  // This assumes you have a showNotification function defined or you can use another way to notify the user
+                }
+            });
+
         });
 
 

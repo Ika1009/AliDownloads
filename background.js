@@ -1,14 +1,14 @@
-importScripts('ExtPay.js')
+// importScripts('ExtPay.js')
 
-const extpay = ExtPay('ali-downloads');
-extpay.startBackground();
+// const extpay = ExtPay('ali-downloads');
+// extpay.startBackground();
 
-extpay.getUser().then(user => {
-    // Save the user's payment status to use later
-    chrome.storage.local.set({'userPaidStatus': user.paid});
-}).catch(error => {
-    console.error("Error fetching user data from ExtPay:", error);
-});
+// extpay.getUser().then(user => {
+//     // Save the user's payment status to use later
+//     chrome.storage.local.set({'userPaidStatus': user.paid});
+// }).catch(error => {
+//     console.error("Error fetching user data from ExtPay:", error);
+// });
 
 
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                         }, function() {
                             if(chrome.runtime.lastError) {
                                 console.error(chrome.runtime.lastError);
-                                sendResponse({status: 'error'});
+                                sendResponse({status: 'noData'});
                                 return;
                             }
                             // Send the main message after injection
@@ -35,6 +35,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                                 // Check if the response status is "noData"
                                 if (response && response.status === "noData") {
                                     showNotification(currentTab, "No relevant data found on the current page.", "Error!");
+                                    sendResponse({status: 'noData'});  // This sends the response back to popup.js
                                 }
                             });
                         });
@@ -44,6 +45,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
                             // Check if the response status is "noData"
                             if (response && response.status === "noData") {
                                 showNotification(currentTab, "No relevant data found on the current page.", "Error!");
+                                sendResponse({status: 'noData'});  // This sends the response back to popup.js
                             }
                         });
                     }
@@ -51,6 +53,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     
             } else {
                 showNotification(currentTab, "Please navigate to Alibaba or AliExpress to use this extension.", "Error!");
+                sendResponse({status: 'noData'});  // This sends the response back to popup.js
             }
         });
     }

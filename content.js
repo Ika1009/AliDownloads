@@ -85,13 +85,14 @@ async function extractFromAliExpress(options) {
     // For images and videos
     if (options.images || options.videos) {
 
-        const sliderDiv = document.querySelector('ul.images-view-list');
+        const parentDiv = document.querySelector('div[class^="slider--box"]');
         
-        if (sliderDiv && options.images) {
-            for (let item of sliderDiv.children) {
-                const imgElement = item.querySelector('img');
+        if (parentDiv) {
+            const imgElements = parentDiv.querySelectorAll('div[class^="slider--img"] img');
+            
+            for (let imgElement of imgElements) {
                 if (imgElement) {
-                    let highResURL = imgElement.src.replace('220x220', '9600x9600');
+                    let highResURL = imgElement.src.replace('80x80', '9600x9600');
                     imgURLs.push(highResURL);
                     console.log("Image URL captured:", highResURL);
                 }
@@ -144,16 +145,25 @@ async function extractFromAliExpress(options) {
     if (options.videos) {
         const videoElement = document.querySelector('video');
         if (videoElement) {
-            let videoSrc = videoElement.src;
-            // Change the video codec to h264
-            if (videoSrc.includes("definition=h265")) {
-                videoSrc = videoSrc.replace("definition=h265", "definition=h264");
+            const sourceElement = videoElement.querySelector('source');
+            
+            if (sourceElement) {
+                let videoSrc = sourceElement.getAttribute('src');
+                
+                // Change the video codec to h264
+                if (videoSrc.includes("definition=h265")) {
+                    videoSrc = videoSrc.replace("definition=h265", "definition=h264");
+                }
+                
+                videoURLs.push(videoSrc);
+                console.log("Video URL captured:", videoSrc);
+            } else {
+                console.log("Source element not found within the video.");
             }
-            videoURLs.push(videoSrc);
-            console.log("Video URL captured:", videoSrc);
         } else {
             console.log("Video element not found.");
         }
+        
     }
     
     const videoPromises = [];
