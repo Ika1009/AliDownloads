@@ -169,32 +169,36 @@ async function extractFromAliExpress(options) {
     const videoPromises = [];
     // Request background to fetch videos due to potential CORS issues
     for (let url of videoURLs) {
-        const videoPromise = new Promise((resolve, reject) => {
-            chrome.runtime.sendMessage({
-                action: 'fetchVideo',
-                url: url
-            }, function(response) {
-                if (response && response.data) {
-                    const base64String = response.data;
-                    const binaryString = atob(base64String);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
+        // Check if the URL exists and is valid
+        if (url && url.trim() !== "") {
+            const videoPromise = new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage({
+                    action: 'fetchVideo',
+                    url: url
+                }, function(response) {
+                    if (response && response.data) {
+                        const base64String = response.data;
+                        const binaryString = atob(base64String);
+                        const len = binaryString.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        const arrayBuffer = bytes.buffer;
+                        zip.file(`videos/${"video_" + url.split('/').pop().split('?')[0]}`, arrayBuffer);
+                        console.log("Video added to zip:", url);
+                        resolve();
+                    } else {
+                        console.error("Error fetching video from background:", url);
+                        reject(new Error("Error fetching video from background"));
                     }
-                    const arrayBuffer = bytes.buffer;
-                    zip.file(`videos/${"video_" + url.split('/').pop().split('?')[0]}`, arrayBuffer);
-                    console.log("Video added to zip:", url);
-                    resolve();
-                } else {
-                    console.error("Error fetching video from background:", url);
-                    reject(new Error("Error fetching video from background"));
-                }
+                });
             });
-        });
-        
-        videoPromises.push(videoPromise);
+
+            videoPromises.push(videoPromise);
+        }
     }
+
     
     // Wait for all video downloads to complete
     await Promise.all(videoPromises);
@@ -320,34 +324,38 @@ async function extractFromAlibaba(options) {
 
     // Request background to fetch videos due to potential CORS issues
     for (let url of videoURLs) {
-        const videoPromise = new Promise((resolve, reject) => {
-            chrome.runtime.sendMessage({
-                action: 'fetchVideo',
-                url: url
-            }, function(response) {
-                if (response && response.data) {
-                    const base64String = response.data;
-                    const binaryString = atob(base64String);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
+        // Check if the URL exists and is valid
+        if (url && url.trim() !== "") {
+            const videoPromise = new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage({
+                    action: 'fetchVideo',
+                    url: url
+                }, function(response) {
+                    if (response && response.data) {
+                        const base64String = response.data;
+                        const binaryString = atob(base64String);
+                        const len = binaryString.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        const arrayBuffer = bytes.buffer;
+                        const fileExtension = url.split('/').pop().split('?')[0].split('.').pop();
+                        const filename = `videos/video.${fileExtension}`;
+                        zip.file(filename, arrayBuffer);
+                        console.log("Video added to zip:", url);
+                        resolve();
+                    } else {
+                        console.error("Error fetching video from background:", url);
+                        reject(new Error("Error fetching video from background"));
                     }
-                    const arrayBuffer = bytes.buffer;
-                    const fileExtension = url.split('/').pop().split('?')[0].split('.').pop();
-                    const filename = `videos/video.${fileExtension}`;
-                    zip.file(filename, arrayBuffer);
-                    console.log("Video added to zip:", url);
-                    resolve();
-                } else {
-                    console.error("Error fetching video from background:", url);
-                    reject(new Error("Error fetching video from background"));
-                }
+                });
             });
-        });
-        
-        videoPromises.push(videoPromise);
+
+            videoPromises.push(videoPromise);
+        }
     }
+
     // Wait for all video downloads to complete
     await Promise.all(videoPromises);
 
