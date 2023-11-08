@@ -2,6 +2,10 @@ const extpay = ExtPay('ali-downloads')
 
 document.querySelector('button').addEventListener('click', extpay.openPaymentPage);
 
+// TESTING
+//document.querySelector('button').addEventListener('click', chrome.storage.local.set({'userPaidStatus': true}));
+
+
 extpay.getUser().then(user => {
     chrome.storage.local.set({'userPaidStatus': user.paid});
 }).catch(err => {
@@ -44,6 +48,22 @@ chrome.storage.local.get('userPaidStatus', function(data) {
             // Disable and gray out the button
             downloadBtn.disabled = true;
 
+
+            // Get the checkboxes and their values
+            const imagesCheckbox = document.getElementById('images').checked;
+            const videosCheckbox = document.getElementById('videos').checked;
+            const descriptionCheckbox = document.getElementById('description').checked;
+
+            // Message to be sent to background.js
+            const message = {
+                action: 'startDownload',
+                downloadOptions: {
+                    images: imagesCheckbox,
+                    videos: videosCheckbox,
+                    description: descriptionCheckbox
+                }
+            };
+
             // Send message to background.js
             chrome.runtime.sendMessage(message, function(response) {
                 if (response && response.status === "noData") {
@@ -72,24 +92,6 @@ chrome.storage.local.get('userPaidStatus', function(data) {
                     progressBar.style.display = 'none'; // Hide the progress bar again
                 }
             }, interval);
-
-            // Get the checkboxes and their values
-            const imagesCheckbox = document.getElementById('images').checked;
-            const videosCheckbox = document.getElementById('videos').checked;
-            const descriptionCheckbox = document.getElementById('description').checked;
-
-            // Message to be sent to background.js
-            const message = {
-                action: 'startDownload',
-                downloadOptions: {
-                    images: imagesCheckbox,
-                    videos: videosCheckbox,
-                    description: descriptionCheckbox
-                }
-            };
-
-
-
         });
 
 
