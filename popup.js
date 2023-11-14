@@ -3,7 +3,7 @@ const extpay = ExtPay('ali-downloads')
 document.querySelector('button').addEventListener('click', extpay.openPaymentPage);
 
 // TESTING
-//document.querySelector('button').addEventListener('click', chrome.storage.local.set({'userPaidStatus': true}));
+document.querySelector('button').addEventListener('click', chrome.storage.local.set({'userPaidStatus': true}));
 
 
 extpay.getUser().then(user => {

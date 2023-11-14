@@ -27,14 +27,19 @@ chrome.runtime.onMessage.addListener(async function(message, sender, sendRespons
 function delay(ms) {
     return new Promise(res => setTimeout(res, ms));
 }
-
 async function extractFromAliExpress(options) {
     const zip = new JSZip();
+    let productName = "item";
+    // Extracting the date in reverse format (YY.MM.DD)
+    const currentDate = new Date();
+    const dateString = currentDate
+        .toLocaleDateString('en-GB', { year: '2-digit', month: '2-digit', day: '2-digit' })
+        .replace(/\//g, '.');
 
     // For description
     if (options.description) {
         let descriptionContent = '';
-    
+
         // Extracting the title
         const headerElement = document.querySelectorAll("h1")[1];
         if (headerElement) {
@@ -43,47 +48,54 @@ async function extractFromAliExpress(options) {
                 .map(child => child.textContent)
                 .join('');
             descriptionContent += extractedText + '\n';
+            productName = extractedText.trim();
+            productName = productName.split(' ').slice(0, 3).join('_');
         }
 
-        const parent = document.getElementById("nav-specification")
+        // Adding product name and date to description file name
+        const descriptionFileName = `description_${productName}_${dateString}.txt`;
+
+        descriptionContent += ` - ${dateString}`;
+        
+        const parent = document.getElementById("nav-specification");
         let buttonElement;
-        if(parent) buttonElement = parent.querySelector("button.specification--btn--CXRSSZD");
+        if (parent) buttonElement = parent.querySelector("button.specification--btn--CXRSSZD");
         // Click the button if it's found
         if (buttonElement) {
             buttonElement.click();
             // Extracting the table specifications
             const specificationLines = document.querySelectorAll(".specification--line--iUJOqof");
             if (specificationLines.length > 0) {
-            specificationLines.forEach(line => {
-                const titles = Array.from(line.querySelectorAll(".specification--title--UbVeyic span"));
-                const descriptions = Array.from(line.querySelectorAll(".specification--desc--Mz148Bl span"));
+                specificationLines.forEach(line => {
+                    const titles = Array.from(line.querySelectorAll(".specification--title--UbVeyic span"));
+                    const descriptions = Array.from(line.querySelectorAll(".specification--desc--Mz148Bl span"));
     
-                for (let i = 0; i < titles.length; i++) {
-                    descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
-                }
-            });
+                    for (let i = 0; i < titles.length; i++) {
+                        descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
+                    }
+                });
             }
         } else {
             const specificationLines = document.querySelectorAll(".specification--line--iUJOqof");
             if (specificationLines.length > 0) {
-            specificationLines.forEach(line => {
-                const titles = Array.from(line.querySelectorAll(".specification--title--UbVeyic span"));
-                const descriptions = Array.from(line.querySelectorAll(".specification--desc--Mz148Bl span"));
+                specificationLines.forEach(line => {
+                    const titles = Array.from(line.querySelectorAll(".specification--title--UbVeyic span"));
+                    const descriptions = Array.from(line.querySelectorAll(".specification--desc--Mz148Bl span"));
     
-                for (let i = 0; i < titles.length; i++) {
-                    descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
-                }
-            });
+                    for (let i = 0; i < titles.length; i++) {
+                        descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
+                    }
+                });
             }
         }
 
-        zip.file('description.txt', descriptionContent);
+        zip.file(descriptionFileName, descriptionContent);
     }
 
     const imgURLs = [];
 
     // For images and videos
-    if (options.images || options.videos) {
+    if (options.images) {
 
         const parentDiv = document.querySelector('div[class^="slider--box"]');
         
@@ -208,7 +220,7 @@ async function extractFromAliExpress(options) {
         const tempURL = URL.createObjectURL(content);
         const tempLink = document.createElement('a');
         tempLink.href = tempURL;
-        tempLink.setAttribute('download', 'Ali-Express-downloads.zip');
+        tempLink.setAttribute('download', `Ali-Express-downloads_${productName}_${dateString}.zip`);
         
         // Append to document for Firefox compatibility
         document.body.appendChild(tempLink);
@@ -221,18 +233,25 @@ async function extractFromAliExpress(options) {
 
         console.log("ZIP file download triggered.");
     });
+
     return true;
 }
 
 
 async function extractFromAlibaba(options) {
     const zip = new JSZip();
+    let productName = "item";
+    // Extracting the date in reverse format (YY.MM.DD)
+    const currentDate = new Date();
+    const dateString = currentDate
+        .toLocaleDateString('en-GB', { year: '2-digit', month: '2-digit', day: '2-digit' })
+        .replace(/\//g, '.');
 
     // For description
     if (options.description) {
         let descriptionContent = '';
-    
-        // Extracting the title
+
+        // Extracting the title from Alibaba
         const headerElement = document.querySelector("h1");
         if (headerElement) {
             const extractedText = Array.from(headerElement.childNodes)
@@ -240,50 +259,67 @@ async function extractFromAlibaba(options) {
                 .map(child => child.textContent)
                 .join('');
             descriptionContent += extractedText + '\n';
+
+            // Update productName and format it
+            productName = extractedText.trim().split(' ').slice(0, 3).join('_');
         }
 
-        for(let i=0; i<2;i++) 
-        {
-            // Extracting the first two rows from the structure-table
-            const tableElement = document.getElementsByClassName("structure-table")[i];
-            if (tableElement) {
-                const rows = tableElement.getElementsByClassName("structure-row");
-                for (let i = 0; i < rows.length; i++) { // Only first two rows or less
-                    const colLeft = rows[i].getElementsByClassName("col-left")[0];
-                    const colRight = rows[i].getElementsByClassName("col-right")[0];
-                    
-                    if (colLeft && colRight) {
-                        const rowContent = `${colLeft.textContent.trim()}: ${colRight.textContent.trim()}`;
-                        descriptionContent += rowContent + '\n';
-                    }
+        // Adding product name and date to description file name for Alibaba
+        const descriptionFileName = `description_${productName}_${dateString}.txt`;
+
+        descriptionContent += ` - ${dateString}`;
+
+        // Extracting the product specifications from Alibaba
+        // You will need to adapt the selectors to match Alibaba's page structure
+        const specificationLines = document.querySelectorAll(".specification-selector-or-class");
+        if (specificationLines.length > 0) {
+            specificationLines.forEach(line => {
+                const titles = Array.from(line.querySelectorAll(".title-selector-or-class span"));
+                const descriptions = Array.from(line.querySelectorAll(".description-selector-or-class span"));
+
+                for (let i = 0; i < titles.length; i++) {
+                    descriptionContent += titles[i].textContent + ': ' + descriptions[i].textContent + '\n';
                 }
-            }
+            });
         }
-    
-        zip.file('description.txt', descriptionContent);
+
+        zip.file(descriptionFileName, descriptionContent);
     }
+
 
     const imgURLs = [];
 
-    // For images and videos
-    if (options.images || options.videos) {
-        const spans = Array.from(document.querySelectorAll('span'));
-        const viewLargerImageBtn = spans.find(span => span.textContent.trim() === "View larger image");
+    // For images
+    if (options.images) {
+        // const spans = Array.from(document.querySelectorAll('span'));
+        // const viewLargerImageBtn = spans.find(span => span.textContent.trim() === "View larger image");
         
-        if (viewLargerImageBtn) {
-            viewLargerImageBtn.click();
-            await delay(3000);
+        // if (viewLargerImageBtn) {
+        //     viewLargerImageBtn.click();
+        //     await delay(3000);
 
-            const sliderDiv = document.querySelector('div.slider-list');
+        //     const sliderDiv = document.querySelector('div.slider-list');
             
-            if (sliderDiv && options.images) {
-                for (let item of sliderDiv.children) {
-                    const imgElement = item.querySelector('img');
-                    if (imgElement) {
-                        let highResURL = imgElement.src.replace('250x250', '9600x9600');
-                        imgURLs.push(highResURL);
-                        console.log("Image URL captured:", highResURL);
-                    }
+        //     if (sliderDiv && options.images) {
+        //         for (let item of sliderDiv.children) {
+        //             const imgElement = item.querySelector('img');
+        //             if (imgElement) {
+        //                 let highResURL = imgElement.src.replace('250x250', '9600x9600');
+        //                 imgURLs.push(highResURL);
+        //                 console.log("Image URL captured:", highResURL);
+        //             }
+        //         }
+        //     }
+        // }
+        const imageListSlider = document.querySelector('.image-list-slider');
+
+        if (imageListSlider && options.images) {
+            for (let item of imageListSlider.children) {
+                const imgElement = item.querySelector('img.image-list-item');
+                if (imgElement) {
+                    let highResURL = imgElement.src.replace('140x140', '9600x9600');
+                    imgURLs.push(highResURL);
+                    console.log("Image URL captured:", highResURL);
                 }
             }
         }
@@ -364,7 +400,7 @@ async function extractFromAlibaba(options) {
         const tempURL = URL.createObjectURL(content);
         const tempLink = document.createElement('a');
         tempLink.href = tempURL;
-        tempLink.setAttribute('download', 'Ali-Baba-downloads.zip');
+        tempLink.setAttribute('download', `Ali-Express-downloads_${productName}_${dateString}.zip`);
         
         // Append to document for Firefox compatibility
         document.body.appendChild(tempLink);
