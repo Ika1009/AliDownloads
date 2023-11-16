@@ -10,7 +10,8 @@
     "storage"
   ],
   "host_permissions": [
-    "<all_urls>"
+      "https://*.aliexpress.com/*",
+      "https://*.alibaba.com/*"
   ],
   "background": {
     "service_worker": "background.js"
