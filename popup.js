@@ -1,19 +1,37 @@
-const extpay = ExtPay('ali-downloads')
-
-document.querySelector('button').addEventListener('click', extpay.openPaymentPage);
-
-// TESTING
-document.querySelector('button').addEventListener('click', chrome.storage.local.set({'userPaidStatus': true}));
-
+const extpay = ExtPay('ali-downloads');
+const button = document.querySelector('button');
 
 extpay.getUser().then(user => {
-    chrome.storage.local.set({'userPaidStatus': user.paid});
+    const now = new Date();
+    const sevenDays = 1000 * 60 * 60 * 24 * 7; // seven days in milliseconds
+
+    // Check if user is on a trial
+    if (user.trialStartedAt) {
+        // Check if the trial has expired
+        if ((now - new Date(user.trialStartedAt)) < sevenDays) {
+            // Trial is active
+            getUserAccess();
+        } else {
+            // Trial expired, check if user has paid
+            chrome.storage.local.get('userPaidStatus', function(data) {
+                if (data.userPaidStatus) {
+                    getUserAccess();
+                } else {
+                    button.addEventListener('click', extpay.openPaymentPage());
+                }
+            });
+        }
+    } else {
+        // No trial started, open trial page
+        button.textContent = "Start Free Trial";
+        button.addEventListener('click', extpay.openTrialPage());
+    }
 }).catch(err => {
-    document.querySelector('p').innerHTML = "Error fetching data :( Check that your ExtensionPay id is correct and you're connected to the internet";
+    document.querySelector('p').innerHTML = "Error fetching data :( Check that you're connected to the internet, if that isn't an issue contact us";
 });
 
-chrome.storage.local.get('userPaidStatus', function(data) {
-   if (data.userPaidStatus) {
+function getUserAccess()
+{
         // Set the new content for paid users
         document.body.innerHTML = `
         <div class="container">
@@ -93,10 +111,5 @@ chrome.storage.local.get('userPaidStatus', function(data) {
                 }
             }, interval);
         });
+}
 
-
-    } else {
-        // Logic for users who haven't paid.
-        // You can update the popup content or any other necessary actions.
-    }
-});
