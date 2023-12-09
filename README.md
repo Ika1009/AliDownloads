@@ -2,7 +2,7 @@
 
 ![AliDownloads Logo](./website/Resources/full_logo1.png)
 
-AliDownloads is a powerful browser extension designed to make your AliBaba and AliExpress shopping experience even better. With AliDownloads, you can effortlessly download any product information from these platforms, ensuring you save time and stay organized.
+AliDownloads is a powerful browser extension designed to make your AliBaba and AliExpress shopping experience even better. With AliDownloads, you can effortlessly download any product information from these platforms, ensuring you save time and stay organized. Learn more about AliDownloads and explore its features on our [official website](https://ali-downloads.digital/).
 
 ## Features 🚀
 
