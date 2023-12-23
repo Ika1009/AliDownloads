@@ -67,3 +67,17 @@ h2 {
     right: 5px; /* Adjust the spacing from the right as needed */
     color: #666; /* Adjust the color as needed */
 }
+.manage-subscription {
+    display: block; /* Makes it a block element to align properly */
+    position: absolute; /* Allows precise positioning */
+    bottom: 5px; /* Position from the bottom */
+    left: 5px; /* Position from the left */
+    font-size: 12px; /* Font size */
+    color: #0185fb; /* Font color */
+    cursor: pointer; /* Changes cursor to hand symbol on hover */
+    text-decoration: none; /* Removes underline from link */
+}
+
+.manage-subscription:hover {
+    text-decoration: underline; /* Adds underline on hover for better UX */
+}

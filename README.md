@@ -2,7 +2,7 @@
 
 ![AliDownloads Logo](./website/Resources/full_logo1.png)
 
-AliDownloads is a powerful browser extension designed to make your AliBaba and AliExpress shopping experience even better. With AliDownloads, you can effortlessly download any product information from these platforms, ensuring you save time and stay organized.
+AliDownloads is a powerful browser extension designed to make your AliBaba and AliExpress shopping experience even better. With AliDownloads, you can effortlessly download any product information from these platforms, ensuring you save time and stay organized. Learn more about AliDownloads and explore its features on our [official website](https://ali-downloads.digital/).
 
 ## Features 🚀
 
@@ -18,6 +18,14 @@ AliDownloads is a powerful browser extension designed to make your AliBaba and A
   - Library: [JSZip](https://stuk.github.io/jszip/) for efficiently handling and packaging files.
   
 - **Website**: HTML with Tailwind CSS for the sleek design
+
+## Gallery 🖼️
+
+![Image 1](./icons/1.png)
+![Image 2](./icons/2.png)
+![Image 3](./icons/3.png)
+![Image 4](./icons/4.png)
+![Image 5](./icons/5.png)
 
 ## Contributing 🤝
 

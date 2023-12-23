@@ -1,30 +1,42 @@
 const extpay = ExtPay('ali-downloads');
 const button = document.querySelector('button');
 
+function addPaymentButtonListener() {
+    button.removeEventListener('click', openTrial);
+    button.textContent = "Pay for Subscription";
+    button.addEventListener('click', openPaymentPage);
+}
+
+function openTrial() {
+    extpay.openTrialPage();
+}
+function openPaymentPage() {
+    extpay.openPaymentPage();
+}
+
 extpay.getUser().then(user => {
     const now = new Date();
     const sevenDays = 1000 * 60 * 60 * 24 * 7; // seven days in milliseconds
 
-    // Check if user is on a trial
-    if (user.trialStartedAt) {
-        // Check if the trial has expired
-        if ((now - new Date(user.trialStartedAt)) < sevenDays) {
-            // Trial is active
+    if(user.paid) {
+        getUserAccess();
+    }
+    else if (user.trialStartedAt) {
+        if ((now - new Date(user.trialStartedAt)) < sevenDays) { 
             getUserAccess();
         } else {
-            // Trial expired, check if user has paid
             chrome.storage.local.get('userPaidStatus', function(data) {
                 if (data.userPaidStatus) {
                     getUserAccess();
                 } else {
-                    button.addEventListener('click', extpay.openPaymentPage());
+                    addPaymentButtonListener();
+                    document.querySelector('p').innerHTML = "7 Day Trial is now over. Please make payment to continue the service";
                 }
             });
         }
     } else {
-        // No trial started, open trial page
         button.textContent = "Start Free Trial";
-        button.addEventListener('click', extpay.openTrialPage());
+        button.addEventListener('click', openTrial);
     }
 }).catch(err => {
     document.querySelector('p').innerHTML = "Error fetching data :( Check that you're connected to the internet, if that isn't an issue contact us";
@@ -55,6 +67,7 @@ function getUserAccess()
                 <progress class="download-progress" max="100" value="0"></progress>
                 <!-- Add the small text here -->
                 <span class="corner-text">© Ali-Downloads</span>
+                <a href="#" class="manage-subscription" id="manageSubscriptionsButton">Manage Subscription</a>
             </div>
         </div>
         `;
@@ -111,5 +124,7 @@ function getUserAccess()
                 }
             }, interval);
         });
+        document.getElementById("manageSubscriptionsButton").addEventListener('click', () => {
+            console.log("Manage subscription clicked");
+        });
 }
-
