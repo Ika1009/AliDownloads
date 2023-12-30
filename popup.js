@@ -1,5 +1,5 @@
 const extpay = ExtPay('ali-downloads');
-const button = document.querySelector('button');
+const button = document.getElementsByClassName('download-btn')[0];
 
 function addPaymentButtonListener() {
     button.removeEventListener('click', openTrial);
@@ -39,7 +39,7 @@ extpay.getUser().then(user => {
         button.addEventListener('click', openTrial);
     }
 }).catch(err => {
-    document.querySelector('p').innerHTML = "Error fetching data :( Check that you're connected to the internet, if that isn't an issue contact us";
+    document.querySelector('p').innerHTML = "Error fetching data :( Check that you're connected to the internet, if that isn't an issue contact us: "+ err.message;
 });
 
 function getUserAccess()
