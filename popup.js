@@ -1,7 +1,13 @@
 const extpay = ExtPay('ali-downloads');
 const button = document.getElementsByClassName('download-btn')[0];
 
+/**
+ * Adds a listener to the payment button.
+ * @function addPaymentButtonListener
+ * @returns {void}
+ */
 function addPaymentButtonListener() {
+    console.log('Adding payment button listener');
     button.removeEventListener('click', openTrial);
     button.textContent = "Pay for Subscription";
     button.addEventListener('click', openPaymentPage);
