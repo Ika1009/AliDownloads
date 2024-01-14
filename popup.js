@@ -132,5 +132,6 @@ function getUserAccess()
         });
         document.getElementById("manageSubscriptionsButton").addEventListener('click', () => {
             console.log("Manage subscription clicked");
+            extpay.openPaymentPage();
         });
 }
