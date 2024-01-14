@@ -132,6 +132,6 @@ function getUserAccess()
         });
         document.getElementById("manageSubscriptionsButton").addEventListener('click', () => {
             console.log("Manage subscription clicked");
-            extpay.openPaymentPage();
+            extpay.openPaymentPage(); // Assuming 'extpay' is the instance of ExtPay
         });
 }
